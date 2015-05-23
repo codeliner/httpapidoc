@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE httpapidoc SYSTEM "main.dtd">
+<httpapidoc host="www.example.com" description="This is also a description and can be used alongside the description tag for short descriptions">
+    <description>This is a generic example for an httpapidoc document as it could be used by any implementer of an API</description>
+    <common>
+        <headers>
+            <header name="AUTHENTICATION-TOKEN">
+                <string description="The authentication token as received from the authentication service" />
+            </header>
+        </headers>
+        <responses>
+            <response httpStatusCode="500">
+                <body>
+                    <json>
+                        <object>
+                            <property name="code">
+                                <string description="The code of the error" />
+                            </property>
+                            <property name="message">
+                                <string description="The description of the error in english" />
+                            </property>
+                        </object>
+                    </json>
+                </body>
+            </response>
+            <response>
+                <description>
+                    The httpStatusCode of this response is not given, thus it must always be expected.
+                    This response is documented in case the server breaks completely and does not execute the desired
+                    code snipped under which circumstances the server would just return something that does not contain
+                    the expected result.
+                </description>
+                <body>
+                    <text>
+                        <description>If the server fails completely the response cannot be guaranteed to contain a valid
+                            json, thus a response only containing text must always be expected</description>
+                    </text>
+                </body>
+            </response>
+        </responses>
+    </common>
+
+    <entryPoint>
+        <description>
+            This entryPoint is responsible for returning all kinds of documents stored on the server
+        </description>
+        <request>
+            <!-- request structure:
+                http://www.example.com/document/<read|get>/<documentId>?encoding=<UTF-8|ISO-8859-1>[&length=<integer>]
+            -->
+            <url protocol="https">
+                <urlPath>
+                    <string fixed="/document/" />
+                    <selectString>
+                        <string fixed="get" />
+                        <string fixed="read" />
+                    </selectString>
+                    <string fixed="/" />
+                    <numberString>
+                        <integer description="The id of the desired document" min="0" />
+                    </numberString>
+                </urlPath>
+                <query>
+                    <queryString>
+                        <object>
+                            <property name="encoding">
+                                <select>
+                                    <string fixed="UTF-8" />
+                                    <string fixed="ISO-8859-1" />
+                                </select>
+                            </property>
+                            <property name="length" optional="yes">
+                                <integer min="0" />
+                            </property>
+                        </object>
+                    </queryString>
+                </query>
+            </url>
+        </request>
+        <responses>
+            <response httpStatusCode="200">
+                <body>
+                    <text>
+                        <description>
+                            The document is served as a pure text document. It is not guaranteed that the
+                            document can be parsed as HTML, XML, CSV or anything of that sort
+                        </description>
+                    </text>
+                </body>
+            </response>
+            <response httpStatusCode="404">
+                <body>
+                    <text />
+                </body>
+            </response>
+        </responses>
+    </entryPoint>
+
+    <entryPoint>
+        <description>
+            This entryPoint serves a csv list of all documents with ids
+        </description>
+        <request>
+            <!-- request structure:
+                http://www.example.com/document/csvList
+            -->
+            <url protocol="https">
+                <urlPath>
+                    <string fixed="/document/csvList" />
+                </urlPath>
+            </url>
+        </request>
+        <responses>
+            <response httpStatusCode="200">
+                <body>
+                    <csv headlines="no">
+                        <csvColumn name="id" columnIndex="0">
+                            <integer />
+                        </csvColumn>
+                        <csvColumn name="name" columnIndex="1">
+                            <string />
+                        </csvColumn>
+                    </csv>
+                </body>
+            </response>
+        </responses>
+    </entryPoint>
+
+</httpapidoc>

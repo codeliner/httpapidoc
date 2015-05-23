@@ -1,0 +1,259 @@
+<!-- description element is used throughout the dtd - ever element may have a description child and/or a description
+    attribute. none of the two take precedence and they can be used simultaneously. -->
+
+    <!ELEMENT description ( #PCDATA )> <!-- element used to describe its parent -->
+
+<!-- top level structure of the document -->
+
+    <!ELEMENT httpapidoc  ( description? | structureTemplates? | common+ | entryPoint+ ) >
+    <!ATTLIST httpapidoc
+            host CDATA #REQUIRED
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT structureTemplates ( structureTemplate+ | description? ) >
+    <!-- under structureTemplates a list of common structures can be defined that can be reused at any location within
+            the xml using the structure tag - when parsing the document all structure tags must be replaced with
+            the content of the corresponding structureTemplate tag -->
+
+    <!ELEMENT structureTemplate ( (%baseTypes;) | description? )>
+    <!ATTLIST structureTemplate
+            id ID #REQUIRED
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT common ( headers | responses )>
+    <!-- definition of common headers and common responses that can be expected from any entry point -->
+    <!-- if a header is defined in common and is again defined in the specific entryPoint the entryPoint
+            definition takes precedence -->
+    <!ATTLIST common
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT entryPoint ( request | responses | description? )>
+    <!ATTLIST entryPoint
+            description CDATA #IMPLIED
+        >
+
+<!-- elements used by both request and response -->
+    <!ELEMENT body ( (%contentType;)+ | description? )>
+    <!ATTLIST body
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT headers ( description? | header+)>
+    <!-- defines a list of headers -->
+    <!ATTLIST headers
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT header ( description? | ( %stringTypes;) )>
+    <!ATTLIST header
+            name CDATA #REQUIRED
+            description CDATA #IMPLIED
+            optional ( yes | no ) "no"
+        >
+
+
+<!-- definition of a request structure -->
+    <!ELEMENT request ( description? | headers? | url | body? )>
+    <!ATTLIST request
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT url ( description? | urlPath? | query? )>
+    <!ATTLIST url
+            protocol ( http | https | ftp ) #IMPLIED
+            authentication CDATA #IMPLIED
+            port CDATA #IMPLIED
+        >
+
+    <!ELEMENT urlPath ( description? | (%stringTypes;) )>
+    <!ATTLIST urlPath
+            description CDATA #IMPLIED
+        >
+
+
+    <!ELEMENT query ( description? | ( queryString | json ) )>
+    <!ATTLIST query
+            description CDATA #IMPLIED
+        >
+
+
+<!-- definition of a response structure -->
+    <!ELEMENT responses ( response+ | description? )>
+    <!ATTLIST responses
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT response ( headers? | body? | description? )>
+    <!ATTLIST response
+            description CDATA #IMPLIED
+            httpStatusCode CDATA #IMPLIED
+        >
+
+
+<!-- Section defining all tags needed to describe a nested structure of data in almost any complexity -->
+
+    <!ENTITY % baseTypes "object | concat | select | numberString | float | integer | null | boolean | string | arrayOf | array">
+    <!ENTITY % stringTypes "string | numberString | concat | selectString">
+
+    <!ELEMENT structure ( description? )>
+    <!ATTLIST structure
+            source IDREF #REQUIRED
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT string ( description? ) >
+    <!ATTLIST string
+            pattern CDATA #IMPLIED
+            description CDATA #IMPLIED
+            fixed CDATA #IMPLIED
+        >
+
+    <!ELEMENT selectString ( description? | (%stringTypes;)+ )>
+    <!ATTLIST selectString
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT numberString ( (integer | float) | description? )>
+    <!ATTLIST numberString
+            decimalPoint CDATA "."
+            pattern CDATA #IMPLIED
+            description CDATA #IMPLIED
+            fixed CDATA #IMPLIED
+        >
+        <!-- Pattern of the number given in the following format:
+               ? = optional digits
+               0 = mandatory digits
+               any other element: text to be used exactly this way
+           The element provided as decimalPoint may appear once or none to identify the
+           location of the decimal point within the structure.
+           Example: "? ??0 000.000 ???"
+                   1.45 would become "001.450"
+                   1000.123 would become "1 000.123"
+                   154324.1123 would become "154 324.112 3"
+           Example: "The beautiful number of 0"
+                   7 would become "The beautiful number of 7"
+               -->
+
+    <!ELEMENT datetime ( description? )>
+    <!ATTLIST datetime
+            description CDATA #IMPLIED
+            fixed CDATA #IMPLIED
+        >
+
+    <!ELEMENT float ( description? ) >
+    <!ATTLIST float
+            min CDATA #IMPLIED
+            max CDATA #IMPLIED
+            maxPrecision CDATA #IMPLIED
+            maxDecimalPlaces CDATA #IMPLIED
+            description CDATA #IMPLIED
+            fixed CDATA #IMPLIED
+        >
+
+    <!ELEMENT integer ( description? ) >
+    <!ATTLIST integer
+            min CDATA #IMPLIED
+            max CDATA #IMPLIED
+            description CDATA #IMPLIED
+            fixed CDATA #IMPLIED
+        >
+
+    <!ELEMENT boolean ( description? ) >
+    <!ATTLIST boolean
+            description CDATA #IMPLIED
+            fixed ( true | false ) #IMPLIED
+        >
+
+    <!ELEMENT null ( description? )>
+    <!ATTLIST null
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT select ( (string | float | integer | boolean | null | numberString | concat)+ | description? )>
+    <!-- tells the user of the API to take one of the options provided to him by this select -->
+    <!ATTLIST select
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT concat ( (string | numberString | datetime )| description? )>
+    <!ATTLIST concat
+            description CDATA #IMPLIED
+            glue CDATA #IMPLIED
+        >
+
+    <!ELEMENT arrayOf ( (%baseTypes;)* | description? ) >
+    <!-- The user of the api must take the specified amount of any of the child elements to fill an array -->
+    <!ATTLIST arrayOf
+            description CDATA #IMPLIED
+            length CDATA #IMPLIED
+            minLength CDATA "0"
+            maxLength CDATA #IMPLIED
+        >
+
+    <!ELEMENT array ( (%baseTypes;)* | description? )>
+    <!-- specifies the exact order and type of elements in an array -->
+
+    <!ELEMENT object ( property* | description? )>
+    <!-- specifies an object with clearly defined properties and desired values of those properties -->
+    <!ATTLIST object
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT property ( (%baseTypes;) | description? )>
+    <!-- the property of an object with a specified content -->
+    <!ATTLIST property
+            name CDATA #REQUIRED
+            optional ( yes | no ) "no"
+            description CDATA #IMPLIED
+        >
+
+
+
+<!-- elements that may occupy string spaces such as body and query string -->
+    <!ENTITY % contentType "json | queryString | xml | html | text | csv | blob">
+    <!ELEMENT json ( (%baseTypes;)* | description? )>
+    <!ATTLIST json
+            description CDATA #IMPLIED
+            fixed CDATA #IMPLIED
+        >
+
+    <!ELEMENT queryString ( (%baseTypes;)+ | description? )>
+    <!ATTLIST queryString
+            description CDATA #IMPLIED
+            fixed CDATA #IMPLIED
+        >
+
+    <!ELEMENT xml ( description? )>
+    <!ATTLIST xml
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT html ( description? )>
+    <!ATTLIST html
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT text ( description? )>
+    <!ATTLIST text
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT csv ( csvColumn* | description? )>
+    <!ATTLIST csv
+            headlines ( yes | no) "no"
+            description CDATA #IMPLIED
+        >
+
+    <!ELEMENT csvColumn ( (%baseTypes;) | description? )>
+    <!ATTLIST csvColumn
+            columnIndex CDATA #REQUIRED
+            name CDATA #IMPLIED
+        >
+
+    <!ELEMENT blob ( description? )>
+    <!ATTLIST blob
+            description CDATA #IMPLIED
+        >
