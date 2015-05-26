@@ -44,7 +44,7 @@
         <description>
             This entryPoint is responsible for returning all kinds of documents stored on the server
         </description>
-        <request>
+        <request method="GET">
             <!-- request structure:
                 http://www.example.com/document/<read|get>/<documentId>?encoding=<UTF-8|ISO-8859-1>[&length=<integer>]
             -->
@@ -100,7 +100,7 @@
         <description>
             This entryPoint serves a csv list of all documents with ids
         </description>
-        <request>
+        <request method="GET">
             <!-- request structure:
                 http://www.example.com/document/csvList
             -->
